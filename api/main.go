@@ -40,10 +40,6 @@ func main() {
 			TimeZone: "America/Los_Angeles",
 		},
 		Recurrence: []string{"RRULE:FREQ=DAILY;COUNT=2"},
-		Attendees: []*calendar.EventAttendee{
-			&calendar.EventAttendee{Email: "lpage@example.com"},
-			&calendar.EventAttendee{Email: "sbrin@example.com"},
-		},
 	}
 
 	calendarId := calendarList.Items[0].Id
