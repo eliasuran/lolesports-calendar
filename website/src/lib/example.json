@@ -1,0 +1,16 @@
+{
+    "Leagues": [
+        {
+            "Name": "LEC"
+        },
+        {
+            "Name": "LCK"
+        },
+        {
+            "Name": "LPL"
+        },
+        {
+            "Name": "LCS"
+        }
+    ]
+}
