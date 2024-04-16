@@ -1,7 +1,7 @@
-from logic.scraper import api_test
+from data.get_data import get_data
 
 def main():
-    api_test()
+    get_data()
 
 if __name__ == "__main__":
     main()
