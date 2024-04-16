@@ -1,7 +1,7 @@
-from logic.scraper import get_schedule
+from logic.scraper import api_test
 
 def main():
-    get_schedule()
+    api_test()
 
 if __name__ == "__main__":
     main()

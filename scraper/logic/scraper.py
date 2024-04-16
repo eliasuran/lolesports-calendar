@@ -1,30 +1,16 @@
-from . import TIMEOUT, URL
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
+from mwrogue.esports_client import EsportsClient
+from mwrogue.esports_client import EsportsClient
 
-# SETTING UP WEBDRIVER 
-options = webdriver.ChromeOptions()
-options.add_argument("--headless=new")
-options.add_argument("--disable-gpu")
 
-driver = webdriver.Chrome(options=options)
+def api_test():
+    site = EsportsClient("lol")
 
-def get_schedule():
-    driver.get(URL)
+    response = site.cargo_client.query(
+        tables="ScoreboardGames=SG, Tournaments=T",
+        join_on="SG.OverviewPage=T.OverviewPage",
+        fields="T.Name, SG.DateTime_UTC, SG.Team1, SG.Team2",
+        where="SG.DateTime_UTC >= '2019-08-01 00:00:00'",  # Results after Aug 1, 2019
+        limit=50
+    )
 
-    wait = WebDriverWait(driver, TIMEOUT)
-    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".simplebar-content")))
-
-    page_source = driver.page_source
-
-    soup = BeautifulSoup(page_source, "html.parser")
-
-    game = soup.find(string="BLG")
-    if game:
-        print(game.text)
-        return
-
-    print("didnt find nuttin")
+    print(response)
