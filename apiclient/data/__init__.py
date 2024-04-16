@@ -1,6 +1,6 @@
-from datetime import date
+from datetime import datetime
 
 # constants
-DATE = date.today()
+DATETIME = datetime.now()
 TOURNAMENTS = ["LPL", "LCK", "LEC", "LCS", "MSI", "Worlds"]
 TIMEOUT = 15
