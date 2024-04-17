@@ -1,4 +1,4 @@
-# scraper
+# api client
 
 using leaguepedia api
 

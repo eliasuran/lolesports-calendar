@@ -1,6 +1,7 @@
+import json
 from mwrogue.esports_client import EsportsClient
 from mwrogue.esports_client import EsportsClient
-from data import TOURNAMENTS, DATETIME
+from . import TOURNAMENTS, DATETIME
 
 site = EsportsClient("lol")
 
@@ -26,4 +27,29 @@ def get_schedule(region: str):
         where="DateTime_UTC >= '%s' AND OverviewPage = '%s'" % (DATETIME, region)
     )
 
-    print(res)
+    schedule = []
+
+    for match in res:
+        data = { "id": "", "Team1": "", "Team2": "", "DateTime": ""}
+
+        data["id"] = match["MatchId"]
+        data["Team1"] = match["Team1"]
+        data["Team2"] = match["Team2"]
+        data["DateTime"] = match["DateTime UTC"]
+
+        schedule.append(data)
+
+    return schedule
+
+def write_to_json(data):
+    if not data:
+        return "No data was provided"
+
+    if type(data) != dict:
+        return "Data was not the correct type"
+
+    json_data = json.dumps(data, indent=4)
+    with open("../data/data.json", "w") as outfile:
+        outfile.write(json_data)
+
+    return
