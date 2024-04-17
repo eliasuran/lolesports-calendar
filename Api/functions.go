@@ -7,22 +7,23 @@ import (
 	"os"
 )
 
-type Data struct {
-	Leagues Leagues
-}
-
 type Leagues struct {
-	League []League
+	Leagues []League
 }
 
 type League struct {
+	Name     string
+	Schedule []Match
+}
+
+type Match struct {
 	ID       string
 	Team1    string
 	Team2    string
 	DateTime string
 }
 
-func get_leagues(w http.ResponseWriter, r *http.Request, dataPath string) {
+func get_active_leagues(w http.ResponseWriter, r *http.Request, dataPath string) {
 	jsonData, err := os.ReadFile(dataPath + "data.json")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -30,7 +31,7 @@ func get_leagues(w http.ResponseWriter, r *http.Request, dataPath string) {
 		return
 	}
 
-	var leagues Data
+	var leagues Leagues
 
 	if err = json.Unmarshal(jsonData, &leagues); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -38,6 +39,12 @@ func get_leagues(w http.ResponseWriter, r *http.Request, dataPath string) {
 		return
 	}
 
+	var data []string
+
+	for i := range leagues.Leagues {
+		data = append(data, leagues.Leagues[i].Name)
+	}
+
 	w.WriteHeader(200)
-	fmt.Fprintln(w, leagues)
+	fmt.Fprintln(w, data)
 }

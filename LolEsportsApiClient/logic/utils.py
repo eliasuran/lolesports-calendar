@@ -30,9 +30,9 @@ def get_schedule(region: str):
     schedule = []
 
     for match in res:
-        data = { "id": "", "Team1": "", "Team2": "", "DateTime": ""}
+        data = { "ID": "", "Team1": "", "Team2": "", "DateTime": ""}
 
-        data["id"] = match["MatchId"]
+        data["ID"] = match["MatchId"]
         data["Team1"] = match["Team1"]
         data["Team2"] = match["Team2"]
         data["DateTime"] = match["DateTime UTC"]

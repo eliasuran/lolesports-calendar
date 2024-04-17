@@ -9,7 +9,7 @@ func addRoutes(
 	dataPath string,
 ) {
 	mux.Handle("GET /", http.NotFoundHandler())
-	mux.HandleFunc("GET /leagues", func(w http.ResponseWriter, r *http.Request) {
-		get_leagues(w, r, dataPath)
+	mux.HandleFunc("GET /active_leagues", func(w http.ResponseWriter, r *http.Request) {
+		get_active_leagues(w, r, dataPath)
 	})
 }
