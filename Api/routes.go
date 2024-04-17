@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 )
 
 func addRoutes(
 	mux *http.ServeMux,
+	dataPath string,
 ) {
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "xdd!")
+	mux.Handle("GET /", http.NotFoundHandler())
+	mux.HandleFunc("GET /leagues", func(w http.ResponseWriter, r *http.Request) {
+		get_leagues(w, r, dataPath)
 	})
 }

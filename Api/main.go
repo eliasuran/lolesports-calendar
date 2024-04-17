@@ -4,13 +4,22 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func run() error {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("no .env file found, trying to access data path elsewhere")
+	}
+
+	dataPath := os.Getenv("DATA_PATH")
+
 	mux := http.NewServeMux()
 
 	// all routes
-	addRoutes(mux)
+	addRoutes(mux, dataPath)
 
 	// defaults to port 8080
 	port := os.Getenv("PORT")
