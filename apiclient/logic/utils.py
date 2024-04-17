@@ -41,7 +41,7 @@ def get_schedule(region: str):
 
     return schedule
 
-def write_to_json(data):
+def write_to_json(data, path):
     if not data:
         return "No data was provided"
 
@@ -49,7 +49,7 @@ def write_to_json(data):
         return "Data was not the correct type"
 
     json_data = json.dumps(data, indent=4)
-    with open("../data/data.json", "w") as outfile:
+    with open(path + "data.json", "w") as outfile:
         outfile.write(json_data)
 
     return

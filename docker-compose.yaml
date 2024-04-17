@@ -1,0 +1,13 @@
+name: lolesports-calendar
+
+services:
+  # lol esports api client
+  apiclient:
+    environment:
+      - DATA_PATH=/data/
+    build: ./apiclient
+    volumes:
+      - data-volume:/data
+
+volumes:
+  data-volume:
