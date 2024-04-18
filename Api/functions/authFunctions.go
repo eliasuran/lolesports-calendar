@@ -2,7 +2,6 @@ package functions
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,57 +12,58 @@ import (
 	"google.golang.org/api/calendar/v3"
 )
 
-type Token struct {
-	Access_token  string
-	Token_type    string
-	Refresh_token string
-	Expiry        string
+func Auth_callback(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL.Query().Get("code"))
+	fmt.Fprintln(w, "Nice! You can return to the terminal")
 }
 
-func Auth_callback(token Token) string {
-	if token.Access_token == "" {
-		return "Invalid token or no token provided"
-	}
-
-	return "Nice! You can return to the terminal"
-}
-
-// anything below this line is authorization
-func Authorize() *http.Client {
+func GetToken() *oauth2.Token {
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
+		fmt.Printf("Unable to read client secret file: %v", err)
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 	if err != nil {
-		log.Fatalf("Unable to parse client secret file to config: %v", err)
+		fmt.Printf("Unable to parse client secret file to config: %v", err)
 	}
-	client := getClient(config)
+	token := createToken(config)
+	return token
+}
+
+// authorize user (NOT DONE CHANGE THIS TO ONLY AUTHORIZE AND RETURN A TOKEN AND NOT RETURN A CLIENT)
+func Validate(token *oauth2.Token) *http.Client {
+	b, err := os.ReadFile("credentials.json")
+	if err != nil {
+		fmt.Printf("Unable to read client secret file: %v", err)
+	}
+
+	// If modifying these scopes, delete your previously saved token.json.
+	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
+	if err != nil {
+		fmt.Printf("Unable to parse client secret file to config: %v", err)
+	}
+	client, token := GetClient(config, token)
 	return client
 }
 
-// Retrieve a token, saves the token, then returns the generated client.
-func getClient(config *oauth2.Config) *http.Client {
-	// The file token.json stores the user's access and refresh tokens, and is
-	// created automatically when the authorization flow completes for the first
-	// time.
-	tokFile := "token.json"
-	tok, err := tokenFromFile(tokFile)
-	if err != nil {
-		tok = getTokenFromWeb(config)
-		saveToken(tokFile, tok)
+func GetClient(config *oauth2.Config, token *oauth2.Token) (*http.Client, *oauth2.Token) {
+	tok := token
+	if tok.AccessToken == "" {
+		tok = createToken(config)
 	}
-	return config.Client(context.Background(), tok)
+	return config.Client(context.Background(), tok), tok
+}
+
+// generating url to visit to login user
+func authUrl(config *oauth2.Config) string {
+	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	return string(authURL)
 }
 
 // Request a token from the web, then returns the retrieved token.
-func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Go to the following link in your browser then type the "+
-		"authorization code: \n%v\n", authURL)
-
+func createToken(config *oauth2.Config) *oauth2.Token {
 	var authCode string
 	if _, err := fmt.Scan(&authCode); err != nil {
 		log.Fatalf("Unable to read authorization code: %v", err)
@@ -74,27 +74,4 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 		log.Fatalf("Unable to retrieve token from web: %v", err)
 	}
 	return tok
-}
-
-// Retrieves a token from a local file.
-func tokenFromFile(file string) (*oauth2.Token, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	tok := &oauth2.Token{}
-	err = json.NewDecoder(f).Decode(tok)
-	return tok, err
-}
-
-// Saves a token to a file path.
-func saveToken(path string, token *oauth2.Token) {
-	fmt.Printf("Saving credential file to: %s\n", path)
-	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		log.Fatalf("Unable to cache oauth token: %v", err)
-	}
-	defer f.Close()
-	json.NewEncoder(f).Encode(token)
 }
