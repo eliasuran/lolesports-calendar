@@ -17,7 +17,7 @@ func run() error {
 
 	dataPath := os.Getenv("DATA_PATH")
 	if dataPath == "" {
-		return errors.New("No datapath found")
+		return errors.New("no datapath found")
 	}
 
 	fmt.Println("Data path set to: ", dataPath)
