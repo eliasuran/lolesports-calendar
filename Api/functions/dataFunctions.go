@@ -1,4 +1,4 @@
-package main
+package functions
 
 import (
 	"encoding/json"
@@ -25,7 +25,7 @@ type Match struct {
 	DateTime string
 }
 
-func get_active_leagues(w http.ResponseWriter, r *http.Request, dataPath string) {
+func Get_active_leagues(w http.ResponseWriter, r *http.Request, dataPath string) {
 	jsonData, err := os.ReadFile(dataPath + "data.json")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -51,7 +51,7 @@ func get_active_leagues(w http.ResponseWriter, r *http.Request, dataPath string)
 	fmt.Fprintln(w, data)
 }
 
-func get_league(w http.ResponseWriter, r *http.Request, dataPath string) {
+func Get_league(w http.ResponseWriter, r *http.Request, dataPath string) {
 	id := r.PathValue("id")
 	jsonData, err := os.ReadFile(dataPath + "data.json")
 	if err != nil {

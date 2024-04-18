@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	calendarapi "github.com/eliasuran/lolesports-calendar-api/CalendarApi"
+	"github.com/eliasuran/lolesports-calendar-api/functions"
 )
 
 func addRoutes(
@@ -11,13 +11,21 @@ func addRoutes(
 	dataPath string,
 ) {
 	mux.Handle("GET /", http.NotFoundHandler())
+
+	// auth
 	mux.HandleFunc("POST /auth", func(w http.ResponseWriter, r *http.Request) {
-		calendarapi.Authorize()
+		functions.Authorize()
 	})
+	mux.HandleFunc("POST /callback", func(w http.ResponseWriter, r *http.Request) {
+		token := functions.Token{}
+		functions.Auth_callback(token)
+	})
+
+	// data
 	mux.HandleFunc("GET /leagues", func(w http.ResponseWriter, r *http.Request) {
-		get_active_leagues(w, r, dataPath)
+		functions.Get_active_leagues(w, r, dataPath)
 	})
 	mux.HandleFunc("GET /leagues/{id}", func(w http.ResponseWriter, r *http.Request) {
-		get_league(w, r, dataPath)
+		functions.Get_league(w, r, dataPath)
 	})
 }

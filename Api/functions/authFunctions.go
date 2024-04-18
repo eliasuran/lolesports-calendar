@@ -1,4 +1,4 @@
-package calendarapi
+package functions
 
 import (
 	"context"
@@ -12,6 +12,21 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
 )
+
+type Token struct {
+	Access_token  string
+	Token_type    string
+	Refresh_token string
+	Expiry        string
+}
+
+func Auth_callback(token Token) string {
+	if token.Access_token == "" {
+		return "Invalid token or no token provided"
+	}
+
+	return "Nice! You can return to the terminal"
+}
 
 // anything below this line is authorization
 func Authorize() *http.Client {
