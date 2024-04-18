@@ -5,9 +5,22 @@ services:
   apiclient:
     environment:
       - DATA_PATH=/data/
-    build: ./apiclient
+    build: ./LolEsportsApiClient
     volumes:
       - data-volume:/data
+
+  # go api
+  api:
+    environment:
+      - DATA_PATH=/data/
+    build: ./Api
+    ports:
+      - "8080:8080"
+    volumes:
+      - data-volume:/data
+    depends_on:
+      - apiclient
+
 
 volumes:
   data-volume:

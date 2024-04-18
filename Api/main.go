@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,6 +16,11 @@ func run() error {
 	}
 
 	dataPath := os.Getenv("DATA_PATH")
+	if dataPath == "" {
+		return errors.New("No datapath found")
+	}
+
+	fmt.Println("Data path set to: ", dataPath)
 
 	mux := http.NewServeMux()
 
