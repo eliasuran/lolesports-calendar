@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/eliasuran/lolesports-calendar-api/functions"
-	"golang.org/x/oauth2"
 )
 
 func addRoutes(
@@ -15,22 +15,16 @@ func addRoutes(
 
 	// auth
 	mux.HandleFunc("POST /validate", func(w http.ResponseWriter, r *http.Request) {
-		// move this to functions
-		r.ParseForm()
-		access_token := r.Form["token"][0]
-
-		token := &oauth2.Token{
-			AccessToken: access_token,
-			// TODO: add rest of the fields
-		}
-
-		client := functions.Validate(token)
+		client := functions.Validate(w, r)
+		fmt.Fprintln(w, client)
 	})
 	mux.HandleFunc("POST /auth", func(w http.ResponseWriter, r *http.Request) {
-		functions.GetToken()
-	})
-	mux.HandleFunc("GET /callback", func(w http.ResponseWriter, r *http.Request) {
-		functions.Auth_callback(w, r)
+		token, err := functions.GetToken()
+		if err != nil {
+			fmt.Fprintf(w, "Error getting token: %v\n", err)
+			return
+		}
+		fmt.Fprintln(w, "Token:", token)
 	})
 
 	// data
