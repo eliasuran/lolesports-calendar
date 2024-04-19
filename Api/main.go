@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 )
 
 func run() error {
+	ctx := context.Background()
+
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println("no .env file found, trying to access data path elsewhere")
@@ -25,7 +28,7 @@ func run() error {
 	mux := http.NewServeMux()
 
 	// all routes
-	addRoutes(mux, dataPath)
+	addRoutes(ctx, mux, dataPath)
 
 	// defaults to port 8080
 	port := os.Getenv("PORT")

@@ -2,6 +2,7 @@ package functions
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,20 +27,22 @@ func GetToken() (*oauth2.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	token := createToken(config)
+	token, err := createToken(config)
+	if err != nil {
+		return nil, err
+	}
 	return token, nil
 }
 
 // Request a token from the web, then returns the retrieved token.
-// TODO: replace log fatals
-func createToken(config *oauth2.Config) *oauth2.Token {
+func createToken(config *oauth2.Config) (*oauth2.Token, error) {
 	authCode := getAuthCode(config)
 
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		return nil, err
 	}
-	return tok
+	return tok, nil
 }
 
 // making chan from getting auth code
@@ -87,9 +90,8 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Auth successful! You can close this window")
 }
 
-// validate users token
-// TODO: return error from this function
-func Validate(w http.ResponseWriter, r *http.Request) *http.Client {
+// validate user's token
+func Validate(w http.ResponseWriter, r *http.Request) (*http.Client, error) {
 	// getting token data from body
 	r.ParseForm()
 	access_token := r.Form["access_token"][0]
@@ -97,14 +99,13 @@ func Validate(w http.ResponseWriter, r *http.Request) *http.Client {
 	expiryString := r.Form["expiry"][0]
 
 	if access_token == "" || refresh_token == "" || expiryString == "" {
-		fmt.Fprintln(w, "Token couldnt be made because not all parts were provided body. Needs access_token, refresh_token and expiry")
+		return nil, errors.New("Token couldnt be made because not all parts were provided body. Needs access_token, refresh_token and expiry")
 	}
 
-	timeFormat := "2024-04-15T11:55:11.215558+02:00"
+	timeFormat := "2006-01-02 15:04:05.999999999 -0700 MST"
 	expiry, err := time.Parse(timeFormat, expiryString)
 	if err != nil {
-		fmt.Fprintf(w, "Couldnt parse expiry string: %v\n", err)
-		return nil
+		return nil, err
 	}
 
 	token := &oauth2.Token{
@@ -116,15 +117,13 @@ func Validate(w http.ResponseWriter, r *http.Request) *http.Client {
 
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
-		fmt.Fprintf(w, "Unable to read client secret file: %v", err)
-		return nil
+		return nil, err
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 	if err != nil {
-		fmt.Fprintf(w, "Unable to parse client secret file to config: %v", err)
-		return nil
+		return nil, err
 	}
-	return config.Client(context.Background(), token)
+	return config.Client(context.Background(), token), nil
 }

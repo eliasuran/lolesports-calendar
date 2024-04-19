@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -8,14 +9,30 @@ import (
 )
 
 func addRoutes(
+	ctx context.Context,
 	mux *http.ServeMux,
 	dataPath string,
 ) {
 	mux.Handle("GET /", http.NotFoundHandler())
 
+	// calendar api
+	mux.HandleFunc("POST /newEvent", func(w http.ResponseWriter, r *http.Request) {
+		client, err := functions.Validate(w, r)
+		if err != nil {
+			fmt.Fprintf(w, "Couldnt validate token: %v\n", err)
+			return
+		}
+		eventLink := functions.CreateEvent(ctx, client)
+		fmt.Fprintln(w, eventLink)
+	})
+
 	// auth
 	mux.HandleFunc("POST /validate", func(w http.ResponseWriter, r *http.Request) {
-		client := functions.Validate(w, r)
+		client, err := functions.Validate(w, r)
+		if err != nil {
+			fmt.Fprintf(w, "Couldnt validate token: %v\n", err)
+			return
+		}
 		fmt.Fprintln(w, client)
 	})
 	mux.HandleFunc("POST /auth", func(w http.ResponseWriter, r *http.Request) {
