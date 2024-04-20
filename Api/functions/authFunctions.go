@@ -97,6 +97,7 @@ func Validate(w http.ResponseWriter, r *http.Request) (*http.Client, error) {
 
 	token_type := r.Form["type"]
 	if len(token_type) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
 		return nil, errors.New("No token type provided")
 	}
 
@@ -121,7 +122,8 @@ func Validate(w http.ResponseWriter, r *http.Request) (*http.Client, error) {
 			Expiry:      expiry,
 		}
 	} else {
-		return nil, errors.New("Malformed request, invalid token type or not all required arguments passed in body")
+		w.WriteHeader(http.StatusBadRequest)
+		return nil, errors.New("Bad request, invalid token type or not all required arguments passed in body")
 	}
 
 	b, err := os.ReadFile("credentials.json")
