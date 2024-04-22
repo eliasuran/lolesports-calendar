@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/eliasuran/lolesports-calendar-api/middleware"
 	"github.com/joho/godotenv"
 )
 
@@ -36,9 +37,13 @@ func run() error {
 		port = "8080"
 	}
 
+	stack := middleware.CreateStack(
+		middleware.Logging,
+	)
+
 	server := http.Server{
 		Addr:    ":" + port,
-		Handler: mux,
+		Handler: stack(mux),
 	}
 
 	fmt.Printf("Listening on port %s\n", port)
