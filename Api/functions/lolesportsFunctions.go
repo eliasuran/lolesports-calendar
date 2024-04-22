@@ -3,8 +3,8 @@ package functions
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -25,11 +25,37 @@ type Match struct {
 	DateTime string
 }
 
-func Get_active_leagues(w http.ResponseWriter, r *http.Request, dataPath string) {
-	jsonData, err := os.ReadFile(dataPath + "data.json")
+func get_pantry_data(url string) ([]byte, error) {
+	payload := strings.NewReader(``)
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, payload)
+
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return body, nil
+}
+
+func Get_active_leagues(w http.ResponseWriter, r *http.Request, url string) {
+	jsonData, err := get_pantry_data(url)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Could not read file: %v\n", err)
+		fmt.Fprintf(w, "Could get data from pantry: %v\n", err)
 		return
 	}
 
@@ -51,12 +77,13 @@ func Get_active_leagues(w http.ResponseWriter, r *http.Request, dataPath string)
 	fmt.Fprintln(w, data)
 }
 
-func Get_league(w http.ResponseWriter, r *http.Request, dataPath string) {
+func Get_league(w http.ResponseWriter, r *http.Request, url string) {
 	id := r.PathValue("id")
-	jsonData, err := os.ReadFile(dataPath + "data.json")
+
+	jsonData, err := get_pantry_data(url)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Could not read file: %v\n", err)
+		fmt.Fprintf(w, "Could get data from pantry: %v\n", err)
 		return
 	}
 

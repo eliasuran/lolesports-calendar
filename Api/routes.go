@@ -11,7 +11,7 @@ import (
 func addRoutes(
 	ctx context.Context,
 	mux *http.ServeMux,
-	dataPath string,
+	pantryUrl string,
 ) {
 	mux.Handle("GET /", http.NotFoundHandler())
 
@@ -46,9 +46,9 @@ func addRoutes(
 
 	// data
 	mux.HandleFunc("GET /leagues", func(w http.ResponseWriter, r *http.Request) {
-		functions.Get_active_leagues(w, r, dataPath)
+		functions.Get_active_leagues(w, r, pantryUrl)
 	})
 	mux.HandleFunc("GET /leagues/{id}", func(w http.ResponseWriter, r *http.Request) {
-		functions.Get_league(w, r, dataPath)
+		functions.Get_league(w, r, pantryUrl)
 	})
 }

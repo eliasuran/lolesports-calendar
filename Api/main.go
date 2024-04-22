@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,17 +18,12 @@ func run() error {
 		fmt.Println("no .env file found, trying to access data path elsewhere")
 	}
 
-	dataPath := os.Getenv("DATA_PATH")
-	if dataPath == "" {
-		return errors.New("no datapath found")
-	}
-
-	fmt.Println("Data path set to: ", dataPath)
+	pantryUrl := os.Getenv("PANTRY_URL")
 
 	mux := http.NewServeMux()
 
 	// all routes
-	addRoutes(ctx, mux, dataPath)
+	addRoutes(ctx, mux, pantryUrl)
 
 	// defaults to port 8080
 	port := os.Getenv("PORT")
