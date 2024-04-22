@@ -1,17 +1,18 @@
 from logic.get_data import get_data
-from logic.utils import write_to_json
+from logic.utils import write_to_pantry
 import os
 from dotenv import load_dotenv
 
 def main():
     load_dotenv()
-    DATA_PATH = os.getenv("DATA_PATH")
+    PANTRY_ID = os.getenv("PANTRY_ID")
 
     data = get_data()
-    error = write_to_json(data, DATA_PATH)
+    error = write_to_pantry(data, PANTRY_ID)
     if error:
-        print("Error writing to json: ", error)
+        print("Error writing to pantry: ", error)
         return
+
 
     print("Successfully got and wrote json data")
 

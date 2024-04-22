@@ -1,4 +1,5 @@
 import json
+import requests
 from mwrogue.esports_client import EsportsClient
 from mwrogue.esports_client import EsportsClient
 from . import TOURNAMENTS, DATETIME
@@ -41,6 +42,7 @@ def get_schedule(region: str):
 
     return schedule
 
+# currently not in use because pantry
 def write_to_json(data, path):
     if not data:
         return "No data was provided"
@@ -51,5 +53,27 @@ def write_to_json(data, path):
     json_data = json.dumps(data, indent=4)
     with open(path + "data.json", "w") as outfile:
         outfile.write(json_data)
+
+    return
+
+
+def write_to_pantry(data, pantry_id):
+    url = "https://getpantry.cloud/apiv1/pantry/"+pantry_id+"/basket/data"
+
+    if not data:
+        return "No data was provided"
+
+    if type(data) != dict:
+        return "Data was not the correct type"
+
+    payload = json.dumps(data, indent=4)
+    headers = {
+      'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    
+    if response.status_code != 200:
+        return "Couldnt write to pantry: "+response.text
 
     return
