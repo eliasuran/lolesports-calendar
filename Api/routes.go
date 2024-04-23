@@ -50,20 +50,16 @@ func addRoutes(
 		fmt.Fprintln(w, client)
 	})
 	// TODO: move this to auth functions
-	mux.HandleFunc("POST /auth", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /auth", func(w http.ResponseWriter, r *http.Request) {
 		config, err := functions.GetConfig()
 		if err != nil {
 			fmt.Fprintf(w, "Error getting config: %v\n", err)
 			return
 		}
 
-		code := r.Form["code"]
-
-		if len(code) == 0 {
-			url := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-			fmt.Fprintln(w, url)
-			return
-		}
+		url := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+		fmt.Fprintln(w, url)
+		return
 	})
 	mux.HandleFunc("GET /callback", func(w http.ResponseWriter, r *http.Request) {
 		config, err := functions.GetConfig()
