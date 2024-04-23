@@ -50,7 +50,7 @@ func addRoutes(
 		fmt.Fprintln(w, client)
 	})
 	// TODO: move this to auth functions
-	mux.HandleFunc("GET /auth", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /auth", func(w http.ResponseWriter, r *http.Request) {
 		config, err := functions.GetConfig()
 		if err != nil {
 			fmt.Fprintf(w, "Error getting config: %v\n", err)
