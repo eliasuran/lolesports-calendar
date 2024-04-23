@@ -41,8 +41,3 @@ func Logging(next http.Handler) http.Handler {
 		log.Println(wrapped.statusCode, r.Method, r.URL.Path, time.Since(start))
 	})
 }
-
-func ValidateToken() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	})
-}

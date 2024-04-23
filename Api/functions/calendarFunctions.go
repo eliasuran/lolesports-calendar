@@ -46,3 +46,22 @@ func CreateEvent(ctx context.Context, client *http.Client) string {
 
 	return event.HtmlLink
 }
+
+func CreateCalendar(ctx context.Context, client *http.Client) (*calendar.Calendar, error) {
+	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return nil, err
+	}
+
+	calendar := &calendar.Calendar{
+		Summary: "Lolesports-calendar",
+	}
+
+	newCalendar, err := srv.Calendars.Insert(calendar).Do()
+	fmt.Println(err)
+	if err != nil {
+		return nil, err
+	}
+
+	return newCalendar, nil
+}

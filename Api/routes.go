@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/eliasuran/lolesports-calendar-api/functions"
+	"golang.org/x/oauth2"
 )
 
 func addRoutes(
@@ -25,6 +26,19 @@ func addRoutes(
 		eventLink := functions.CreateEvent(ctx, client)
 		fmt.Fprintln(w, eventLink)
 	})
+	mux.HandleFunc("POST /newCalendar", func(w http.ResponseWriter, r *http.Request) {
+		client, err := functions.Validate(w, r)
+		if err != nil {
+			fmt.Fprintf(w, "Couldnt validate token: %v\n", err)
+			return
+		}
+		calendar, err := functions.CreateCalendar(ctx, client)
+		if err != nil {
+			fmt.Fprintf(w, "Could not create calendar: %v\n", err)
+			return
+		}
+		fmt.Println(calendar)
+	})
 
 	// auth
 	mux.HandleFunc("POST /validate", func(w http.ResponseWriter, r *http.Request) {
@@ -35,8 +49,33 @@ func addRoutes(
 		}
 		fmt.Fprintln(w, client)
 	})
+	// TODO: move this to auth functions
 	mux.HandleFunc("GET /auth", func(w http.ResponseWriter, r *http.Request) {
-		token, err := functions.GetToken()
+		config, err := functions.GetConfig()
+		if err != nil {
+			fmt.Fprintf(w, "Error getting config: %v\n", err)
+			return
+		}
+
+		code := r.Form["code"]
+
+		if len(code) == 0 {
+			url := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+			fmt.Fprintln(w, url)
+			return
+		}
+	})
+	mux.HandleFunc("GET /callback", func(w http.ResponseWriter, r *http.Request) {
+		config, err := functions.GetConfig()
+		if err != nil {
+			fmt.Fprintf(w, "Error getting config: %v\n", err)
+			return
+		}
+		code := r.URL.Query().Get("code")
+		if code == "" {
+			fmt.Fprintln(w, "No code in url")
+		}
+		token, err := functions.CreateToken(config, code)
 		if err != nil {
 			fmt.Fprintf(w, "Error getting token: %v\n", err)
 			return

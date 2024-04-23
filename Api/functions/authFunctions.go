@@ -3,12 +3,8 @@ package functions
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
-	"os/exec"
-	"runtime"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -16,7 +12,7 @@ import (
 	"google.golang.org/api/calendar/v3"
 )
 
-func GetToken() (*oauth2.Token, error) {
+func GetConfig() (*oauth2.Config, error) {
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
 		return nil, err
@@ -27,67 +23,16 @@ func GetToken() (*oauth2.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	token, err := createToken(config)
-	if err != nil {
-		return nil, err
-	}
-	return token, nil
+	return config, nil
 }
 
 // Request a token from the web, then returns the retrieved token.
-func createToken(config *oauth2.Config) (*oauth2.Token, error) {
-	authCode := getAuthCode(config)
-
+func CreateToken(config *oauth2.Config, authCode string) (*oauth2.Token, error) {
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
 		return nil, err
 	}
 	return tok, nil
-}
-
-// making chan from getting auth code
-var authCodeChan = make(chan string)
-
-// generating and visiting url
-// then getting the auth code search param from the callback endpoint
-func getAuthCode(config *oauth2.Config) string {
-	url := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	var err error
-
-	switch runtime.GOOS {
-	case "linux":
-		err = exec.Command("xdg-open", url).Start()
-	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-	case "darwin":
-		err = exec.Command("open", url).Start()
-	default:
-		err = fmt.Errorf("unsupported platform")
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	http.HandleFunc("/callback", handleCallback)
-	go http.ListenAndServe(":8888", nil)
-
-	for {
-		code := <-authCodeChan
-		if code != "" {
-			return code
-		}
-		time.Sleep(1 * time.Second)
-	}
-}
-
-// handling callback
-func handleCallback(w http.ResponseWriter, r *http.Request) {
-	code := r.URL.Query().Get("code")
-	if code == "" {
-		http.Error(w, "Auth code not found", http.StatusBadRequest)
-	}
-	authCodeChan <- code
-	fmt.Fprintln(w, "Auth successful! You can close this window")
 }
 
 // validate user's token
