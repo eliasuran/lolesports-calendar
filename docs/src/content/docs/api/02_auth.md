@@ -3,8 +3,8 @@ title: "Auth"
 description: "How to authorize and get your tokens"
 ---
 
-Recieve an oauth2 token used to interact with google calendar. After making the request, a browser will popup, asking you to authorize with your google account. 
-After authorizing with google, another browser will popup telling you the status of your request.
+Recieve an oauth2 token used to interact with google calendar. Making a request to auth will return a url. Visit the url and follow the auth process.
+After authorizing with google, you will be redirected to /callback with your token. See <a href="/api/callback">callback</a> for info about the callback endpoint.
 
 ## Request
 
@@ -23,12 +23,7 @@ curl -X GET http://localhost:8080/auth
 200 - Success
 
 ```json
-{
-    "access_token": string,
-    "expires_in": string,
-    "refresh_token": string,
-    "token_type": string
-}
+"url"
 ```
 
 401 - Bad request
