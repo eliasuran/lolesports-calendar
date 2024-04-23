@@ -35,7 +35,7 @@ func addRoutes(
 		}
 		fmt.Fprintln(w, client)
 	})
-	mux.HandleFunc("POST /auth", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /auth", func(w http.ResponseWriter, r *http.Request) {
 		token, err := functions.GetToken()
 		if err != nil {
 			fmt.Fprintf(w, "Error getting token: %v\n", err)
