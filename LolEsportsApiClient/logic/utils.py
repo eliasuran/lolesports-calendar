@@ -42,6 +42,22 @@ def get_schedule(region: str):
 
     return schedule
 
+def get_all_leagues() -> list:
+    res = site.cargo_client.query(
+        tables="Leagues",
+        fields="League, League_Short, Region",
+        where="Level = 'Primary' AND IsOfficial = 'Yes'"
+    )
+
+    data = []
+
+    for league in res:
+        for tournament in TOURNAMENTS:
+            if tournament == league["League Short"] and not "as" in league["League Short"].lower() and not "academy" in league["League Short"].lower():
+                data.append(league)
+
+    return data
+
 # currently not in use because pantry
 def write_to_json(data, path):
     if not data:

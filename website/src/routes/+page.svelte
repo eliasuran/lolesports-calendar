@@ -1,0 +1,14 @@
+<script lang="ts">
+	let selected = [];
+</script>
+
+<div class="space-y-12">
+	<h1 class="text-4xl">hello world</h1>
+	<div class="flex gap-12 flex-wrap">
+		<div
+			class="h-52 aspect-square bg-primary border border-text rounded-md grid place-items-center font-bold text-2xl"
+		>
+			xdd
+		</div>
+	</div>
+</div>
