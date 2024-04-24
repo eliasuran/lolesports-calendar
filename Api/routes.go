@@ -14,9 +14,17 @@ func addRoutes(
 	mux *http.ServeMux,
 	pantryUrl string,
 ) {
-	mux.Handle("GET /", http.NotFoundHandler())
 
 	// calendar api
+	mux.HandleFunc("GET /calendars", func(w http.ResponseWriter, r *http.Request) {
+		client, err := functions.Validate(w, r)
+		if err != nil {
+			fmt.Fprintf(w, "Couldnt validate token: %v\n", err)
+			return
+		}
+		calendars, err := functions.MyCalendars(ctx, client)
+		fmt.Fprintln(w, calendars)
+	})
 	mux.HandleFunc("POST /newEvent", func(w http.ResponseWriter, r *http.Request) {
 		client, err := functions.Validate(w, r)
 		if err != nil {
@@ -51,7 +59,7 @@ func addRoutes(
 	})
 	// TODO: move this to auth functions
 	mux.HandleFunc("GET /auth", func(w http.ResponseWriter, r *http.Request) {
-		config, err := functions.GetConfig()
+		config, err := functions.GetConfig(w)
 		if err != nil {
 			fmt.Fprintf(w, "Error getting config: %v\n", err)
 			return
@@ -62,7 +70,7 @@ func addRoutes(
 		return
 	})
 	mux.HandleFunc("GET /callback", func(w http.ResponseWriter, r *http.Request) {
-		config, err := functions.GetConfig()
+		config, err := functions.GetConfig(w)
 		if err != nil {
 			fmt.Fprintf(w, "Error getting config: %v\n", err)
 			return
@@ -70,8 +78,9 @@ func addRoutes(
 		code := r.URL.Query().Get("code")
 		if code == "" {
 			fmt.Fprintln(w, "No code in url")
+			return
 		}
-		token, err := functions.CreateToken(config, code)
+		token, err := functions.CreateToken(w, config, code)
 		if err != nil {
 			fmt.Fprintf(w, "Error getting token: %v\n", err)
 			return
@@ -86,4 +95,7 @@ func addRoutes(
 	mux.HandleFunc("GET /leagues/{id}", func(w http.ResponseWriter, r *http.Request) {
 		functions.Get_league(w, r, pantryUrl)
 	})
+
+	// 404
+	mux.Handle("GET /", http.NotFoundHandler())
 }

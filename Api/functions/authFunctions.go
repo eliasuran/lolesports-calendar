@@ -12,24 +12,26 @@ import (
 	"google.golang.org/api/calendar/v3"
 )
 
-func GetConfig() (*oauth2.Config, error) {
+func GetConfig(w http.ResponseWriter) (*oauth2.Config, error) {
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
+		w.WriteHeader(500)
 		return nil, err
 	}
 
-	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 	if err != nil {
+		w.WriteHeader(500)
 		return nil, err
 	}
 	return config, nil
 }
 
 // Request a token from the web, then returns the retrieved token.
-func CreateToken(config *oauth2.Config, authCode string) (*oauth2.Token, error) {
+func CreateToken(w http.ResponseWriter, config *oauth2.Config, authCode string) (*oauth2.Token, error) {
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return nil, err
 	}
 	return tok, nil
@@ -73,12 +75,14 @@ func Validate(w http.ResponseWriter, r *http.Request) (*http.Client, error) {
 
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return nil, err
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return nil, err
 	}
 	return config.Client(context.Background(), token), nil

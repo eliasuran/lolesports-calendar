@@ -10,6 +10,21 @@ import (
 	"google.golang.org/api/option"
 )
 
+func MyCalendars(ctx context.Context, client *http.Client) (*calendar.CalendarList, error) {
+	// TODO: make srv in validate function
+	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return nil, err
+	}
+
+	calendars, err := srv.CalendarList.List().Do()
+	if err != nil {
+		return nil, err
+	}
+
+	return calendars, nil
+}
+
 func CreateEvent(ctx context.Context, client *http.Client) string {
 	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
@@ -55,6 +70,7 @@ func CreateCalendar(ctx context.Context, client *http.Client) (*calendar.Calenda
 
 	calendar := &calendar.Calendar{
 		Summary: "Lolesports-calendar",
+		Id:      "aaaaaa",
 	}
 
 	newCalendar, err := srv.Calendars.Insert(calendar).Do()
