@@ -23,7 +23,7 @@ func addRoutes(
 			return
 		}
 		calendars, err := functions.MyCalendars(ctx, client)
-		fmt.Fprintln(w, calendars)
+		fmt.Fprintln(w, calendars.Items)
 	})
 	mux.HandleFunc("POST /newEvent", func(w http.ResponseWriter, r *http.Request) {
 		client, err := functions.Validate(w, r)
@@ -46,6 +46,7 @@ func addRoutes(
 			return
 		}
 		fmt.Println(calendar)
+		fmt.Fprintln(w, "Calendar created!")
 	})
 
 	// auth

@@ -69,12 +69,12 @@ func CreateCalendar(ctx context.Context, client *http.Client) (*calendar.Calenda
 	}
 
 	calendar := &calendar.Calendar{
-		Summary: "Lolesports-calendar",
-		Id:      "aaaaaa",
+		Summary:     "lolesports",
+		TimeZone:    "Europe/Berlin",
+		Description: "Personal calendar with lolesports schedule for your favorite teams.",
 	}
 
 	newCalendar, err := srv.Calendars.Insert(calendar).Do()
-	fmt.Println(err)
 	if err != nil {
 		return nil, err
 	}
