@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"time"
+	"strings"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -42,35 +42,26 @@ func Validate(w http.ResponseWriter, r *http.Request) (*http.Client, error) {
 	// getting token data from body
 	r.ParseForm()
 
-	token_type := r.Form["type"]
-	if len(token_type) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		return nil, errors.New("No token type provided")
-	}
-
 	var token *oauth2.Token
 
-	if token_type[0] == "refresh_token" && len(r.Form["refresh_token"]) > 0 {
-		refresh_token := r.Form["refresh_token"][0]
-		token = &oauth2.Token{
-			RefreshToken: refresh_token,
-		}
-	} else if token_type[0] == "access_token" && len(r.Form["access_token"]) > 0 && len(r.Form["expiry"]) > 0 {
-		access_token := r.Form["access_token"][0]
-		expiryString := r.Form["expiry"][0]
-		timeFormat := "2006-01-02 15:04:05.999999999 -0700 MST"
-		expiry, err := time.Parse(timeFormat, expiryString)
-		if err != nil {
-			return nil, err
-		}
-		token = &oauth2.Token{
-			AccessToken: access_token,
-			TokenType:   "Bearer",
-			Expiry:      expiry,
-		}
-	} else {
+	auth_header := r.Header.Get("Authorization")
+	if auth_header == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		return nil, errors.New("Bad request, invalid token type or not all required arguments passed in body")
+		return nil, errors.New("No access token provided")
+	}
+
+	split_auth_header := strings.Split(auth_header, " ")
+	if len(split_auth_header) != 2 {
+		w.WriteHeader(http.StatusBadRequest)
+		return nil, errors.New("Auth header in invalid format")
+	}
+
+	token_type := strings.Split(auth_header, " ")[0]
+	access_token := strings.Split(auth_header, " ")[1]
+
+	token = &oauth2.Token{
+		TokenType:   token_type,
+		AccessToken: access_token,
 	}
 
 	b, err := os.ReadFile("credentials.json")
