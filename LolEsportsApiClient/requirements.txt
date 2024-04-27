@@ -1,2 +1,4 @@
 mwrogue
 python-dotenv
+selenium
+beautifulsoup4

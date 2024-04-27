@@ -1,9 +1,13 @@
 from logic.get_data import get_data
-from logic.utils import write_to_pantry
+from logic.utils import get_all_leagues, get_teams, write_to_pantry
 import os
 from dotenv import load_dotenv
 
 def main():
+    teams = get_teams("LEC", 10)
+    print(teams)
+    return
+
     load_dotenv()
     PANTRY_ID = os.getenv("PANTRY_ID")
 

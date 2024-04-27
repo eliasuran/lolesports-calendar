@@ -58,6 +58,26 @@ def get_all_leagues() -> list:
 
     return data
 
+def get_teams(league: str, teams: int) -> list:
+    res = site.cargo_client.query(
+        tables="TournamentRosters",
+        fields="Team",
+        where=f"Tournament LIKE '%2024%' AND Tournament LIKE '%{league} %' AND Tournament LIKE '%Spring%'" 
+    )
+
+    print(res)
+
+    team_names = []
+
+    for i in res:
+        if len(team_names) == teams:
+            break
+        team_name = i["Team"]
+        if team_name not in team_names:
+            team_names.append(team_name)
+
+    return team_names
+
 # currently not in use because pantry
 def write_to_json(data, path):
     if not data:
