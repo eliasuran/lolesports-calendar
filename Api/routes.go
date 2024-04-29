@@ -90,11 +90,20 @@ func addRoutes(
 	})
 
 	// data
-	mux.HandleFunc("GET /leagues", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /active_leagues", func(w http.ResponseWriter, r *http.Request) {
 		functions.Get_active_leagues(w, r, pantryUrl)
 	})
-	mux.HandleFunc("GET /leagues/{id}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /schedule/{id}", func(w http.ResponseWriter, r *http.Request) {
+		functions.Get_schedule(w, r, pantryUrl)
+	})
+	mux.HandleFunc("GET /all_leagues", func(w http.ResponseWriter, r *http.Request) {
+		functions.Get_all_leagues(w, r, pantryUrl)
+	})
+	mux.HandleFunc("GET /league/{id}", func(w http.ResponseWriter, r *http.Request) {
 		functions.Get_league(w, r, pantryUrl)
+	})
+	mux.HandleFunc("GET /team/{id}", func(w http.ResponseWriter, r *http.Request) {
+		functions.Get_team(w, r, pantryUrl)
 	})
 
 	// 404

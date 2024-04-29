@@ -9,10 +9,11 @@ import (
 )
 
 type Leagues struct {
-	Leagues []League
+	Active_leagues []ScheduleLeague
+	All_leagues    []League
 }
 
-type League struct {
+type ScheduleLeague struct {
 	ID       string
 	Name     string
 	Schedule []Match
@@ -23,6 +24,19 @@ type Match struct {
 	Team1    string
 	Team2    string
 	DateTime string
+}
+
+type League struct {
+	ID    string
+	Name  string
+	Logo  string
+	Teams []Team
+}
+
+type Team struct {
+	Name  string
+	Short string
+	Image string
 }
 
 func get_pantry_data(url string) ([]byte, error) {
@@ -69,12 +83,75 @@ func Get_active_leagues(w http.ResponseWriter, r *http.Request, url string) {
 
 	var data []string
 
-	for i := range leagues.Leagues {
-		data = append(data, leagues.Leagues[i].ID)
+	for i := range leagues.Active_leagues {
+		data = append(data, leagues.Active_leagues[i].ID)
 	}
 
 	w.WriteHeader(200)
 	fmt.Fprintln(w, data)
+}
+
+func Get_schedule(w http.ResponseWriter, r *http.Request, url string) {
+	id := r.PathValue("id")
+
+	jsonData, err := get_pantry_data(url)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could get data from pantry: %v\n", err)
+		return
+	}
+
+	var leagues Leagues
+
+	if err = json.Unmarshal(jsonData, &leagues); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could not parse json: %v\n", err)
+		return
+	}
+
+	var league ScheduleLeague
+
+	for i := range leagues.Active_leagues {
+		if strings.ToLower(leagues.Active_leagues[i].ID) == strings.ToLower(id) {
+			league = leagues.Active_leagues[i]
+			break
+		}
+	}
+
+	if league.Name == "" {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "%v not found\n", id)
+		return
+	}
+
+	jsonLeague, err := json.Marshal(league)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could not marshal json data: %v\n", err)
+		return
+	}
+
+	w.WriteHeader(200)
+	fmt.Fprintln(w, string(jsonLeague))
+}
+
+func Get_all_leagues(w http.ResponseWriter, r *http.Request, url string) {
+	jsonData, err := get_pantry_data(url)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could get data from pantry: %v\n", err)
+		return
+	}
+
+	var leagues Leagues
+
+	if err = json.Unmarshal(jsonData, &leagues); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could not parse json: %v\n", err)
+		return
+	}
+
+	fmt.Fprintln(w, leagues.All_leagues)
 }
 
 func Get_league(w http.ResponseWriter, r *http.Request, url string) {
@@ -97,11 +174,17 @@ func Get_league(w http.ResponseWriter, r *http.Request, url string) {
 
 	var league League
 
-	for i := range leagues.Leagues {
-		if strings.ToLower(leagues.Leagues[i].ID) == strings.ToLower(id) {
-			league = leagues.Leagues[i]
+	for i := range leagues.All_leagues {
+		if strings.ToLower(leagues.All_leagues[i].ID) == strings.ToLower(id) {
+			league = leagues.All_leagues[i]
 			break
 		}
+	}
+
+	if league.Name == "" {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "%v not found\n", id)
+		return
 	}
 
 	jsonLeague, err := json.Marshal(league)
@@ -113,4 +196,50 @@ func Get_league(w http.ResponseWriter, r *http.Request, url string) {
 
 	w.WriteHeader(200)
 	fmt.Fprintln(w, string(jsonLeague))
+}
+
+func Get_team(w http.ResponseWriter, r *http.Request, url string) {
+	id := r.PathValue("id")
+
+	jsonData, err := get_pantry_data(url)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could get data from pantry: %v\n", err)
+		return
+	}
+
+	var leagues Leagues
+
+	if err = json.Unmarshal(jsonData, &leagues); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could not parse json: %v\n", err)
+		return
+	}
+
+	var team Team
+
+	for i := range leagues.All_leagues {
+		for y := range leagues.All_leagues[i].Teams {
+			if strings.ToLower(leagues.All_leagues[i].Teams[y].Short) == strings.ToLower(id) {
+				team = leagues.All_leagues[i].Teams[y]
+				break
+			}
+		}
+	}
+
+	if team.Name == "" {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "%v not found\n", id)
+		return
+	}
+
+	jsonTeam, err := json.Marshal(team)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could not marshal json data: %v\n", err)
+		return
+	}
+
+	w.WriteHeader(200)
+	fmt.Fprintln(w, string(jsonTeam))
 }
