@@ -1,20 +1,20 @@
 ---
-title: "League"
-description: "Get data about a specific league"
+title: "Schedule"
+description: "Get data and schedule for a specific league"
 ---
 
 Get info and the scheulde of a league.
 
 ## Request
 
-endpoint: /leagues/{id}
+endpoint: /schedule/{id}
 
 method: GET
 
 Sample request:
 
 ```bash
-curl -X GET http://localhost:8080/leagues/msi
+curl -X GET http://localhost:8080/schedule/msi
 ```
 
 ## Response

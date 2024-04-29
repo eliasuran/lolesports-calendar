@@ -1,5 +1,5 @@
 ---
-title: "Leagues"
+title: "Active Leagues"
 description: "Get an array containing all active leagues"
 ---
 
@@ -7,7 +7,7 @@ Get an array of all active leagues
 
 ## Request
 
-endpoint: /leagues
+endpoint: /active_leagues
 
 method: GET
 
