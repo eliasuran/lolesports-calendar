@@ -2,11 +2,12 @@ import json
 import requests
 from mwrogue.esports_client import EsportsClient
 from mwrogue.esports_client import EsportsClient
-from . import TOURNAMENTS, DATETIME
+from . import CONSISTENT_TOURNAMENTS, TOURNAMENTS, DATETIME
 
 site = EsportsClient("lol")
 
 def get_active_leagues() -> list:
+    print("Getting all leagues")
     res = site.cargo_client.query(
         tables="CurrentLeagues",
         fields="Event, OverviewPage",
@@ -22,6 +23,7 @@ def get_active_leagues() -> list:
     return data
 
 def get_schedule(region: str):
+    print(f"Getting schedule for {region}")
     res = site.cargo_client.query(
         tables="MatchSchedule",
         fields="Team1, Team2, DateTime_UTC, OverviewPage, MatchId",
@@ -52,13 +54,14 @@ def get_all_leagues() -> list:
     data = []
 
     for league in res:
-        for tournament in TOURNAMENTS:
+        for tournament in CONSISTENT_TOURNAMENTS:
             if tournament == league["League Short"] and not "as" in league["League Short"].lower() and not "academy" in league["League Short"].lower():
                 data.append(league)
 
     return data
 
 def get_teams(league: str, amount: int) -> list:
+    print(f"Getting data for {league} with {amount} teams")
     res = site.cargo_client.query(
         tables="TournamentRosters",
         fields="Team",
@@ -83,11 +86,15 @@ def get_teams(league: str, amount: int) -> list:
     return teams
 
 def get_team_data(team: str) -> dict:
+    print(f"Getting data for {team}")
+    parsedTeam = team.replace("'", "''")
     res = site.cargo_client.query(
         tables="Teams",
         fields="Name, Short, Image",
-        where=f"Name = '{team}'" 
+        where=f"Name = '%s'" % parsedTeam
     )
+
+    print(res)
 
     if len(res) == 0:
         return {}
@@ -109,9 +116,7 @@ def write_to_json(data, path):
     return
 
 
-def write_to_pantry(data, pantry_id):
-    url = "https://getpantry.cloud/apiv1/pantry/"+pantry_id+"/basket/data"
-
+def write_to_pantry(data, pantry_url):
     if not data:
         return "No data was provided"
 
@@ -123,7 +128,7 @@ def write_to_pantry(data, pantry_id):
       'Content-Type': 'application/json'
     }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = requests.request("POST", pantry_url, headers=headers, data=payload)
     
     if response.status_code != 200:
         return "Couldnt write to pantry: "+response.text

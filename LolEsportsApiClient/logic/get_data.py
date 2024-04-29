@@ -1,18 +1,10 @@
-from logic.utils import get_active_leagues, get_all_leagues, get_schedule
+from logic import REGIONS
+from logic.utils import get_active_leagues, get_all_leagues, get_schedule, get_teams
 
 
 def get_data():
-    data = {
-        "Active_leagues": [{ "ID": "te", "Name": "test", "Schedule": [] }],
-        "All_leagues": [ 
-            { 
-                "ID": "te", 
-                "Name": "test", 
-                "Logo": "imgsrc", 
-                "Teams": [{ "ID": "g2", "Name": "gamers2", "Logo": "g2logo" }] 
-            }
-        ]
-    }
+    print("Starting program..")
+    data = { "Active_leagues": [], "All_leagues": [] }
 
     active_leagues = get_active_leagues()
 
@@ -25,13 +17,17 @@ def get_data():
             league_data["Schedule"] = schedule
             data["Active_leagues"].append(league_data) 
 
+    print("Getting all leagues")
     all_leagues = get_all_leagues()
     for league in all_leagues:
+        print(f"Adding data for {league["League"]}")
         league_data = {}
         league_data["ID"] = league["League Short"]
         league_data["Name"] = league["League"]
         league_data["Logo"] = ""
-        league_data["Teams"] = []
+        amount = REGIONS[league["League Short"]]
+        teams = get_teams(league["League Short"], amount)
+        league_data["Teams"] = teams
         data["All_leagues"].append(league_data)
 
     return data
