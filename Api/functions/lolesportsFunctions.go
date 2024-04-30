@@ -39,6 +39,8 @@ type Team struct {
 	Image string
 }
 
+func marshalJson() {}
+
 func get_pantry_data(url string) ([]byte, error) {
 	payload := strings.NewReader(``)
 
@@ -151,7 +153,15 @@ func Get_all_leagues(w http.ResponseWriter, r *http.Request, url string) {
 		return
 	}
 
-	fmt.Fprintln(w, leagues.All_leagues)
+	jsonLeagues, err := json.Marshal(leagues.All_leagues)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Could not marshal json data: %v\n", err)
+		return
+	}
+
+	w.WriteHeader(200)
+	fmt.Fprintln(w, string(jsonLeagues))
 }
 
 func Get_league(w http.ResponseWriter, r *http.Request, url string) {

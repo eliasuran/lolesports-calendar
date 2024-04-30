@@ -94,8 +94,6 @@ def get_team_data(team: str) -> dict:
         where=f"Name = '%s'" % parsedTeam
     )
 
-    print(res)
-
     if len(res) == 0:
         return {}
 

@@ -15,13 +15,13 @@ import (
 func GetConfig(w http.ResponseWriter) (*oauth2.Config, error) {
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return nil, err
 	}
 
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return nil, err
 	}
 	return config, nil

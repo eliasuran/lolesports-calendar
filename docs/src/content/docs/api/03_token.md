@@ -1,5 +1,5 @@
 ---
-title: "Callback"
+title: "Token"
 description: "Recieving token in callback"
 ---
 
@@ -7,14 +7,14 @@ Recieve an oauth2 token if a valid code is present in url.
 
 ## Request
 
-endpoint: /callback
+endpoint: /token
 
 method: GET
 
 Sample request:
 
 ```bash
-curl -X GET http://localhost:8080/callback?code=your_auth_code
+curl -X GET http://localhost:8080/token -d { "code": "auth_code" }
 ```
 
 ## Response

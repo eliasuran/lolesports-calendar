@@ -8,6 +8,7 @@ import (
 
 	"github.com/eliasuran/lolesports-calendar-api/middleware"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 func run() error {
@@ -37,7 +38,7 @@ func run() error {
 
 	server := http.Server{
 		Addr:    ":" + port,
-		Handler: stack(mux),
+		Handler: stack(cors.Default().Handler(mux)),
 	}
 
 	fmt.Printf("Listening on port %s\n", port)

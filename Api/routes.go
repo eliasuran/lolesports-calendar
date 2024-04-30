@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -40,12 +41,11 @@ func addRoutes(
 			fmt.Fprintf(w, "Couldnt validate token: %v\n", err)
 			return
 		}
-		calendar, err := functions.CreateCalendar(ctx, client)
+		_, err = functions.CreateCalendar(ctx, client)
 		if err != nil {
 			fmt.Fprintf(w, "Could not create calendar: %v\n", err)
 			return
 		}
-		fmt.Println(calendar)
 		fmt.Fprintln(w, "Calendar created!")
 	})
 
@@ -62,31 +62,45 @@ func addRoutes(
 	mux.HandleFunc("GET /auth", func(w http.ResponseWriter, r *http.Request) {
 		config, err := functions.GetConfig(w)
 		if err != nil {
-			fmt.Fprintf(w, "Error getting config: %v\n", err)
+			fmt.Printf("Error getting config: %v\n", err)
 			return
 		}
 
 		url := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-		fmt.Fprintln(w, url)
-		return
+		json, err := json.Marshal(url)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Error marshaling json: %v\n", err)
+			return
+		}
+		fmt.Fprintln(w, string(json))
 	})
-	mux.HandleFunc("GET /callback", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /token", func(w http.ResponseWriter, r *http.Request) {
 		config, err := functions.GetConfig(w)
 		if err != nil {
-			fmt.Fprintf(w, "Error getting config: %v\n", err)
+			fmt.Printf("Error getting config: %v\n", err)
 			return
 		}
 		code := r.URL.Query().Get("code")
 		if code == "" {
-			fmt.Fprintln(w, "No code in url")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Println("No token found")
 			return
 		}
 		token, err := functions.CreateToken(w, config, code)
 		if err != nil {
-			fmt.Fprintf(w, "Error getting token: %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Printf("Error getting token: %v\n", err)
 			return
 		}
-		fmt.Fprintln(w, "Token:", token)
+
+		json, err := json.Marshal(token)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Error marshaling token: %v\n", err)
+			return
+		}
+		fmt.Fprintln(w, string(json))
 	})
 
 	// data
